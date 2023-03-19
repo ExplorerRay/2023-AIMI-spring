@@ -1,2 +1,2 @@
 # AIMI_Lab1
-Detect diseases from chest X-Ray images
+Detect pneumonia from chest X-Ray images
