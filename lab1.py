@@ -34,16 +34,39 @@ def measurement(outputs, labels, smooth=1e-10):
     return tp, tn, fp, fn
 
 def plot_accuracy(train_acc_list, val_acc_list):
-    # TODO plot training and testing accuracy curve
-    pass
+    fig, axs= plt.subplots(1,2)
+    epoch_list = []
+    for e in range(1,len(train_acc_list)+1):
+        epoch_list.append(e)
+
+    axs[0].set_title('Train_Accuracy')
+    axs[0].plot(epoch_list, train_acc_list)
+
+    axs[1].set_title('Test_Accuracy')
+    axs[1].plot(epoch_list, val_acc_list)
+    plt.savefig('accu.png')
+    plt.show()
+    plt.clf()
 
 def plot_f1_score(f1_score_list):
-    # TODO plot testing f1 score curve
-    pass
+    epoch_list = []
+    for e in range(1,len(f1_score_list)+1):
+        epoch_list.append(e)
+
+    plt.title('Test_F1_score')
+    plt.plot(epoch_list, f1_score_list)
+    plt.savefig('f1.png')
+    plt.show()
+    plt.clf()
 
 def plot_confusion_matrix(confusion_matrix):
-    # TODO plot confusion matrix
-    pass
+    x_label = ['Predicted Normal', 'Predicted Pneumonia']
+    y_label = ['Actual Normal', 'Actual Pneumonia']
+    sns.heatmap(confusion_matrix, xticklabels=x_label, yticklabels=y_label, annot=True, fmt='g')
+    plt.savefig('cm.png')
+    plt.show()
+    plt.clf()
+    print(confusion_matrix)
 
 def train(device, train_loader, model, criterion, optimizer):
     best_acc = 0.0
@@ -157,7 +180,8 @@ if __name__ == '__main__':
     # set dataloader
     train_dataset = ImageFolder(root=os.path.join(args.dataset, 'train'),
                                 transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
-                                                                transforms.RandomRotation(args.degree, resample=False),
+                                                                #transforms.RandomRotation(args.degree),
+                                                                transforms.RandomVerticalFlip(p=0.5),
                                                                 transforms.ToTensor()]))
     test_dataset = ImageFolder(root=os.path.join(args.dataset, 'test'),
                                transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
@@ -167,7 +191,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
     # define model
-    model = models.resnet18(pretrained=True)
+    model = models.resnet50(pretrained=True)
     num_neurons = model.fc.in_features
     model.fc = nn.Linear(num_neurons, args.num_classes)
     model = model.to(device)
