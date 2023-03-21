@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     # for training
     parser.add_argument('--num_epochs', type=int, required=False, default=30)
-    parser.add_argument('--batch_size', type=int, required=False, default=128)
+    parser.add_argument('--batch_size', type=int, required=False, default=96)
     parser.add_argument('--lr', type=float, default=1e-5)
     parser.add_argument('--wd', type=float, default=0.9)
 
@@ -178,10 +178,17 @@ if __name__ == '__main__':
     print(f'## Now using {device} as calculating device ##')
 
     # set dataloader
+    tran_set = [
+        transforms.RandomRotation(args.degree),
+        transforms.RandomVerticalFlip(p=1),
+        transforms.RandomHorizontalFlip(p=1),
+        transforms.RandomAffine(),
+        transforms.RandomPerspective(),
+        transforms.ColorJitter()
+    ]
     train_dataset = ImageFolder(root=os.path.join(args.dataset, 'train'),
                                 transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
-                                                                #transforms.RandomRotation(args.degree),
-                                                                transforms.RandomVerticalFlip(p=0.5),
+                                                                transforms.RandomChoice(tran_set),
                                                                 transforms.ToTensor()]))
     test_dataset = ImageFolder(root=os.path.join(args.dataset, 'test'),
                                transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
