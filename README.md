@@ -6,3 +6,9 @@ val_acc_list is actually for testing data. We can see every thing about validati
 
 ### batch size
 If the size is bigger, you will need less steps to finish 1 epoch. But at the same time, it also costs more RAM.
+
+### plot_accuracy and plot_f1_score
+Use matplotlib to plot and store the plot in png file
+
+### plot_confusion_matrix
+Use seaborn heatmap to generate the graph
