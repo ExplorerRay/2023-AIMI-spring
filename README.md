@@ -12,3 +12,6 @@ Use matplotlib to plot and store the plot in png file
 
 ### plot_confusion_matrix
 Use seaborn heatmap to generate the graph
+
+### tran_set
+Use serveral functions in transforms to augment data
