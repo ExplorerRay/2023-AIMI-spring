@@ -1,6 +1,7 @@
 import os
 import warnings
 import numpy as np
+from torchvision.transforms.transforms import RandomGrayscale
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from argparse import ArgumentParser
@@ -182,13 +183,14 @@ if __name__ == '__main__':
         transforms.RandomRotation(args.degree),
         transforms.RandomVerticalFlip(p=1),
         transforms.RandomHorizontalFlip(p=1),
-        transforms.RandomAffine(),
+        transforms.RandomGrayscale(p=1),
+        transforms.RandomAffine(args.degree),
         transforms.RandomPerspective(),
         transforms.ColorJitter()
     ]
     train_dataset = ImageFolder(root=os.path.join(args.dataset, 'train'),
                                 transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
-                                                                transforms.RandomChoice(tran_set),
+                                                                transforms.RandomOrder(tran_set),
                                                                 transforms.ToTensor()]))
     test_dataset = ImageFolder(root=os.path.join(args.dataset, 'test'),
                                transform = transforms.Compose([transforms.Resize((args.resize, args.resize)),
