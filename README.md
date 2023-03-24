@@ -15,3 +15,6 @@ Use seaborn heatmap to generate the graph
 
 ### tran_set
 Use serveral functions in transforms to augment data
+
+### model
+Use pre-trained resnet50 in torchvision module
