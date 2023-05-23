@@ -75,8 +75,8 @@ config.nhidden2 = FLAGS.nhidden2
 config.attention_size1 = FLAGS.attention_size1
 
 eeg_active = ((FLAGS.eeg_train_data != "") and (FLAGS.eeg_test_data != ""))
-eog_active = ((FLAGS.eog_train_data != "") and (FLAGS.eog_test_data != ""))
-emg_active = ((FLAGS.emg_train_data != "") and (FLAGS.emg_test_data != ""))
+eog_active = False
+emg_active = False
 
 if (eeg_active):
     print("eeg active")
