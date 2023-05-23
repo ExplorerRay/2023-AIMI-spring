@@ -1,6 +1,7 @@
 """https://gist.github.com/spitis/27ab7d2a30bbaf5ef431b4a02194ac60"""
 """adapted from https://github.com/OlavHN/bnlstm to store separate population statistics per state"""
 import tensorflow as tf, numpy as np
+#tf.compat.v1.reset_default_graph()
 RNNCell = tf.compat.v1.nn.rnn_cell.RNNCell
 
 class BNLSTMCell(RNNCell):

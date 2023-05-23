@@ -1,6 +1,7 @@
 import tensorflow as tf
 from nn_basic_layers import *
 from filterbank_shape import FilterbankShape
+import numpy
 
 class SeqSleepNet_Sleep(object):
     """
@@ -91,7 +92,7 @@ class SeqSleepNet_Sleep(object):
                                                                             scope=scope)
             print(rnn_out1.get_shape())
             # output shape (batchsize*epoch_step, frame_step, nhidden1*2)
-
+        tf.compat.v1.reset_default_graph()
         with tf.device('/gpu:0'), tf.compat.v1.variable_scope("frame_attention_layer"):
             self.attention_out1 = attention(rnn_out1, self.config.attention_size1)
             print(self.attention_out1.get_shape())
@@ -101,14 +102,16 @@ class SeqSleepNet_Sleep(object):
         # bidirectional frame-level recurrent layer
         
         ###我加的###
+        tf.compat.v1.reset_default_graph()
         B = 20
         K = 10
         e2_rnn_input = tf.reshape(e_rnn_input, [-1, B, K, self.config.nhidden1*2])
-        e3_rnn_input = tf.Variable(tf.zeros([-1]))
-        e4_rnn_input = tf.Variable(tf.zeros([-1]))
+        #e3_rnn_input = e2_rnn_input
+        #e4_rnn_input = e2_rnn_input
         #folding
         
         with tf.device('/gpu:0'), tf.compat.v1.variable_scope("epoch_rnn_layer") as scope:
+            l = []
             for i in range(B):
                 fw_cell3, bw_cell3 = bidirectional_recurrent_layer_bn_new(self.config.nhidden2,
                                                                       self.config.nlayer2,
@@ -116,16 +119,22 @@ class SeqSleepNet_Sleep(object):
                                                                       is_training=self.istraining,
                                                                       input_keep_prob=self.dropout_keep_prob_rnn,
                                                                       output_keep_prob=self.dropout_keep_prob_rnn)
+                # e3_rnn_input[:,i,:,:], rnn_state3 = bidirectional_recurrent_layer_output_new(fw_cell3,
+                #                                                                 bw_cell3,
+                #                                                                 e2_rnn_input[:,i,:,:],
+                #                                                                 self.epoch_seq_len,
+                #                                                                 scope=scope)
                 e3, rnn_state3 = bidirectional_recurrent_layer_output_new(fw_cell3,
                                                                                 bw_cell3,
                                                                                 e2_rnn_input[:,i,:,:],
                                                                                 self.epoch_seq_len,
                                                                                 scope=scope)
-                
-                e3_rnn_input[:,i,:,:].assign(e3)
+                l.append(e3)
+            e3_rnn_input = tf.stack(l, 1)
             print(e3_rnn_input.get_shape())
         #intra-subsequence
-        
+
+            l = []
             for i in range(K):
                 fw_cell4, bw_cell4 = bidirectional_recurrent_layer_bn_new(self.config.nhidden2,
                                                                       self.config.nlayer2,
@@ -133,12 +142,18 @@ class SeqSleepNet_Sleep(object):
                                                                       is_training=self.istraining,
                                                                       input_keep_prob=self.dropout_keep_prob_rnn,
                                                                       output_keep_prob=self.dropout_keep_prob_rnn)
+                # e4_rnn_input[:,:,i,:], rnn_state3 = bidirectional_recurrent_layer_output_new(fw_cell4,
+                #                                                                 bw_cell4,
+                #                                                                 e3_rnn_input[:,:,i,:],
+                #                                                                 self.epoch_seq_len,
+                #                                                                 scope=scope)
                 e4, rnn_state3 = bidirectional_recurrent_layer_output_new(fw_cell4,
                                                                                 bw_cell4,
                                                                                 e3_rnn_input[:,:,i,:],
                                                                                 self.epoch_seq_len,
                                                                                 scope=scope)
-                e4_rnn_input[:,:,i,:].assign(e4)
+                l.append(e4)
+            e4_rnn_input = tf.stack(l, 2)
             print(e4_rnn_input.get_shape())
         #inter-subsequence
         ###########
