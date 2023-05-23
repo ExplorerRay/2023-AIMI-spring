@@ -43,7 +43,7 @@ class DataGenerator:
             self.data_size += len(sample['y']) # add number of epochs
             print(self.data_size)
 
-        self.X = np.ndarray([self.data_size, self.data_shape[0], self.data_shape[1]], dtype=complex)
+        self.X = np.ndarray([self.data_size, self.data_shape[0], self.data_shape[1]])
         self.y = np.ndarray([self.data_size, self.Ncat])
         self.label = np.ndarray([self.data_size])
         count = 0
@@ -124,10 +124,11 @@ class DataGenerator:
         for L in range(len(sample['y'])):
             f, t, z = stft(sample['X'][0][3000*L:3000*(L+1)], fs=100, window='hamming', nfft=256, nperseg=200, boundary=None)
             z = np.array(z)
+            z = np.abs(z)
             X.append(z.T)
 
 
-        X = np.array(X, dtype=complex)
+        X = np.array(X)
         #X = np.transpose(X, (2, 1, 0))  # rearrange dimension
         y = np.array(y)
         #y = np.transpose(y, (1, 0))  # rearrange dimension
