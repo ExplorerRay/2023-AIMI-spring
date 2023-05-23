@@ -241,22 +241,22 @@ with tf.Graph().as_default():
         net = SeqSleepNet_Sleep(config=config)
 
         # for batch normalization
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             # Define Training procedure
             global_step = tf.Variable(0, name="global_step", trainable=False)
-            optimizer = tf.train.AdamOptimizer(config.learning_rate)
+            optimizer = tf.compat.v1.train.AdamOptimizer(config.learning_rate)
             grads_and_vars = optimizer.compute_gradients(net.loss)
             train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
         out_dir = os.path.abspath(os.path.join(os.path.curdir,FLAGS.out_dir))
         print("Writing to {}\n".format(out_dir))
 
-        saver = tf.train.Saver(tf.all_variables(), max_to_keep=1)
+        saver = tf.compat.v1.train.Saver(tf.compat.v1.all_variables(), max_to_keep=1)
 
         # initialize all variables
         print("Model initialized")
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.compat.v1.initialize_all_variables())
 
         def train_step(x_batch, y_batch):
             """
@@ -348,7 +348,7 @@ with tf.Graph().as_default():
                 print("{}: step {}, output_loss {}, total_loss {} acc {}".format(time_str, train_step_, train_output_loss_, train_total_loss_, acc_))
                 step += 1
 
-                current_step = tf.train.global_step(sess, global_step)
+                current_step = tf.compat.v1.train.global_step(sess, global_step)
                 if current_step % config.evaluate_every == 0:
                     # Validate the model on the entire evaluation test set after each epoch
                     print("{} Start validation".format(datetime.now()))

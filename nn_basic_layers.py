@@ -10,13 +10,13 @@ Predefine all necessary layers for SeqSleepNet
 
 def fc(x, num_in, num_out, name, relu=True):
     #with tf.device('/gpu:0'), tf.variable_scope(name) as scope:
-    with tf.variable_scope(name) as scope:
+    with tf.compat.v1.variable_scope(name) as scope:
         # Create tf variables for the weights and biases
-        weights = tf.get_variable('weights', shape=[num_in, num_out])
-        biases = tf.get_variable('biases', [num_out])
+        weights = tf.compat.v1.get_variable('weights', shape=[num_in, num_out])
+        biases = tf.compat.v1.get_variable('biases', [num_out])
 
         # Matrix multiply weights and inputs and add bias
-        act = tf.nn.xw_plus_b(x, weights, biases, name=scope.name)
+        act = tf.compat.v1.nn.xw_plus_b(x, weights, biases, name=scope.name)
 
         if relu == True:
             relu = tf.nn.relu(act)  # Apply ReLu non linearity
