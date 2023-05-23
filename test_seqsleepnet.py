@@ -26,30 +26,30 @@ from scipy.io import loadmat, savemat
 # ==================================================
 
 # Misc Parameters
-tf.app.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
-tf.app.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
+tf.compat.v1.app.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
+tf.compat.v1.app.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 # My Parameters
-tf.app.flags.DEFINE_string("eeg_train_data", "../train_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("eeg_test_data", "../test_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("eog_train_data", "../train_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("eog_test_data", "../test_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("emg_train_data", "../train_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("emg_test_data", "../test_data.mat", "Point to directory of input data")
-tf.app.flags.DEFINE_string("out_dir", "./output/", "Point to output directory")
-tf.app.flags.DEFINE_string("checkpoint_dir", "./checkpoint/", "Point to checkpoint directory")
+tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "../train_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "../test_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eog_train_data", "../train_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eog_test_data", "../test_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("emg_train_data", "../train_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("emg_test_data", "../test_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("out_dir", "./output/", "Point to output directory")
+tf.compat.v1.app.flags.DEFINE_string("checkpoint_dir", "./checkpoint/", "Point to checkpoint directory")
 
-tf.app.flags.DEFINE_float("dropout_keep_prob_rnn", 0.75, "Dropout keep probability (default: 0.75)")
+tf.compat.v1.app.flags.DEFINE_float("dropout_keep_prob_rnn", 0.75, "Dropout keep probability (default: 0.75)")
 
-tf.app.flags.DEFINE_integer("seq_len", 20, "Sequence length (default: 20)")
+tf.compat.v1.app.flags.DEFINE_integer("seq_len", 20, "Sequence length (default: 20)")
 
-tf.app.flags.DEFINE_integer("nfilter", 32, "Sequence length (default: 32)")
+tf.compat.v1.app.flags.DEFINE_integer("nfilter", 32, "Sequence length (default: 32)")
 
-tf.app.flags.DEFINE_integer("nhidden1", 64, "Sequence length (default: 64)")
-tf.app.flags.DEFINE_integer("attention_size1", 64, "Sequence length (default: 64)")
-tf.app.flags.DEFINE_integer("nhidden2", 64, "Sequence length (default: 64)")
+tf.compat.v1.app.flags.DEFINE_integer("nhidden1", 64, "Sequence length (default: 64)")
+tf.compat.v1.app.flags.DEFINE_integer("attention_size1", 64, "Sequence length (default: 64)")
+tf.compat.v1.app.flags.DEFINE_integer("nhidden2", 64, "Sequence length (default: 64)")
 
-FLAGS = tf.app.flags.FLAGS
+FLAGS = tf.compat.v1.app.flags.FLAGS
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()): # python3
     print("{}={}".format(attr.upper(), value))
@@ -189,22 +189,22 @@ print("/Test batches per epoch: {:d}".format(test_batches_per_epoch))
 
 
 with tf.Graph().as_default():
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0, allow_growth=False)
-    session_conf = tf.ConfigProto(
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1.0, allow_growth=False)
+    session_conf = tf.compat.v1.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement,
       gpu_options=gpu_options)
     #session_conf.gpu_options.allow_growth = False
-    sess = tf.Session(config=session_conf)
+    sess = tf.compat.v1.Session(config=session_conf)
     with sess.as_default():
         net = SeqSleepNet_Sleep(config=config)
 
         
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             # Define Training procedure
             global_step = tf.Variable(0, name="global_step", trainable=False)
-            optimizer = tf.train.AdamOptimizer(config.learning_rate)
+            optimizer = tf.compat.v1.train.AdamOptimizer(config.learning_rate)
             grads_and_vars = optimizer.compute_gradients(net.loss)
             train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
@@ -212,7 +212,7 @@ with tf.Graph().as_default():
         out_dir = os.path.abspath(os.path.join(os.path.curdir,FLAGS.out_dir))
         print("Writing to {}\n".format(out_dir))
 
-        saver = tf.train.Saver(tf.all_variables())
+        saver = tf.compat.v1.train.Saver(tf.compat.v1.all_variables())
         # Load saved model to continue training or initialize all variables
         best_dir = os.path.join(checkpoint_path, "best_model_acc")
         saver.restore(sess, best_dir)
