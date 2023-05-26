@@ -30,8 +30,8 @@ tf.compat.v1.app.flags.DEFINE_boolean("allow_soft_placement", True, "Allow devic
 tf.compat.v1.app.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 # My Parameters
-tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "../train_data.mat", "Point to directory of input data")
-tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "../test_data.mat", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "home/110550123/SLEEPdata/cassette_processed/pretext/", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "home/110550123/SLEEPdata/cassette_processed/test/", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_train_data", "../train_data.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_test_data", "../test_data.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("emg_train_data", "../train_data.mat", "Point to directory of input data")
@@ -41,7 +41,7 @@ tf.compat.v1.app.flags.DEFINE_string("checkpoint_dir", "./checkpoint/", "Point t
 
 tf.compat.v1.app.flags.DEFINE_float("dropout_keep_prob_rnn", 0.75, "Dropout keep probability (default: 0.75)")
 
-tf.compat.v1.app.flags.DEFINE_integer("seq_len", 20, "Sequence length (default: 20)")
+tf.compat.v1.app.flags.DEFINE_integer("seq_len", 200, "Sequence length (default: 20)")
 
 tf.compat.v1.app.flags.DEFINE_integer("nfilter", 32, "Sequence length (default: 32)")
 
@@ -231,7 +231,7 @@ with tf.Graph().as_default():
                 net.istraining: 0
             }
             output_loss, total_loss, yhat, score = sess.run(
-                   [net.output_loss, net.loss, net.predictions, han.scores], feed_dict)
+                   [net.output_loss, net.loss, net.predictions, net.scores], feed_dict)
             return output_loss, total_loss, yhat, score
 
         def evaluate(gen):
@@ -262,13 +262,18 @@ with tf.Graph().as_default():
             yhat = yhat + 1
 
             test_acc = np.zeros([config.epoch_seq_len])
+            test_MaF = np.zeros([config.epoch_seq_len])
+            test_kap = np.zeros([config.epoch_seq_len])
             for n in range(config.epoch_seq_len):
+                test_MaF[n] = f1_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n], average='macro')
                 test_acc[n] = accuracy_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n]) # due to zero-indexing
-            return test_acc, yhat, score, output_loss, total_loss
+                test_kap[n] = cohen_kappa_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n])
+            return test_acc, yhat, score, output_loss, total_loss, test_MaF, test_kap
 
-        test_acc, test_yhat, test_score, test_output_loss, test_total_loss = evaluate(gen=test_generator)
+        test_acc, test_yhat, test_score, test_output_loss, test_total_loss, test_MaF, test_kap = evaluate(gen=test_generator)
         savemat(os.path.join(out_path, "test_ret.mat"), dict(yhat = test_yhat, acc = test_acc, score = test_score,
                                                              output_loss = test_output_loss,
-                                                             total_loss = test_total_loss))
+                                                             total_loss = test_total_loss,
+                                                             MacroF_one = test_MaF, kappa = test_kap))
         test_generator.reset_pointer()
 

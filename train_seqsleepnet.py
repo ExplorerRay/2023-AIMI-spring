@@ -30,9 +30,12 @@ tf.compat.v1.app.flags.DEFINE_boolean("allow_soft_placement", True, "Allow devic
 tf.compat.v1.app.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 # My Parameters
-tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "D:\\download\\cassette_processed\\pretext\\", "Point to directory of input data")
-tf.compat.v1.app.flags.DEFINE_string("eeg_eval_data", "D:\\download\\cassette_processed\\train\\", "Point to directory of input data")
-tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "D:\\download\\cassette_processed\\test\\", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "/home/110550123/SLEEPdata/cassette_processed/pretext/", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_eval_data", "/home/110550123/SLEEPdata/cassette_processed/train/", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "/home/110550123/SLEEPdata/cassette_processed/test/", "Point to directory of input data")
+# tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "D:\\download\\cassette_processed\\pretext\\", "Point to directory of input data")
+# tf.compat.v1.app.flags.DEFINE_string("eeg_eval_data", "D:\\download\\cassette_processed\\train\\", "Point to directory of input data")
+# tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "D:\\download\\cassette_processed\\test\\", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_train_data", "../train_data.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_eval_data", "../data/eval_data_1.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_test_data", "../test_data.mat", "Point to directory of input data")
@@ -44,7 +47,7 @@ tf.compat.v1.app.flags.DEFINE_string("checkpoint_dir", "./checkpoint/", "Point t
 
 tf.compat.v1.app.flags.DEFINE_float("dropout_keep_prob_rnn", 0.75, "Dropout keep probability (default: 0.75)")
 
-tf.compat.v1.app.flags.DEFINE_integer("seq_len", 20, "Sequence length (default: 20)")
+tf.compat.v1.app.flags.DEFINE_integer("seq_len", 200, "Sequence length (default: 20)")
 
 tf.compat.v1.app.flags.DEFINE_integer("nfilter", 32, "Sequence length (default: 32)")
 
@@ -316,17 +319,29 @@ with tf.Graph().as_default():
                 total_loss += total_loss_
             yhat = yhat + 1
             acc = 0
+            MaF = 0
+            kap = 0
             with open(os.path.join(out_dir, log_filename), "a") as text_file:
                 text_file.write("{:g} {:g} ".format(output_loss, total_loss))
                 for n in range(config.epoch_seq_len):
+                    MaF_n = f1_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n], average='macro')                    
                     acc_n = accuracy_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n]) # due to zero-indexing
+                    kap_n = cohen_kappa_score(yhat[n,:], gen.label[gen.data_index - (config.epoch_seq_len - 1) + n])
                     if n == config.epoch_seq_len - 1:
-                        text_file.write("{:g} \n".format(acc_n))
+                        text_file.write("acc={:g} \n".format(acc_n))
+                        text_file.write("MF1={:g} \n".format(MaF_n))
+                        text_file.write("kap={:g} \n".format(kap_n))
                     else:
-                        text_file.write("{:g} ".format(acc_n))
+                        text_file.write("acc={:g} ".format(acc_n))
+                        text_file.write("MF1={:g} ".format(MaF_n))
+                        text_file.write("kap={:g} ".format(kap_n))
                     acc += acc_n
+                    MaF += MaF_n
+                    kap += kap_n
+            MaF /= config.epoch_seq_len
             acc /= config.epoch_seq_len
-            return acc, yhat, output_loss, total_loss
+            kap /= config.epoch_seq_len
+            return acc, yhat, output_loss, total_loss, MaF, kap
 
         start_time = time.time()
         # Loop over number of epochs
@@ -352,8 +367,8 @@ with tf.Graph().as_default():
                 if current_step % config.evaluate_every == 0:
                     # Validate the model on the entire evaluation test set after each epoch
                     print("{} Start validation".format(datetime.now()))
-                    eval_acc, eval_yhat, eval_output_loss, eval_total_loss = evaluate(gen=eval_generator, log_filename="eval_result_log.txt")
-                    test_acc, test_yhat, test_output_loss, test_total_loss = evaluate(gen=test_generator, log_filename="test_result_log.txt")
+                    eval_acc, eval_yhat, eval_output_loss, eval_total_loss, eval_MaF, eval_kap = evaluate(gen=eval_generator, log_filename="eval_result_log.txt")
+                    test_acc, test_yhat, test_output_loss, test_total_loss, test_MaF, test_kap = evaluate(gen=test_generator, log_filename="test_result_log.txt")
 
                     if(eval_acc >= best_acc):
                         best_acc = eval_acc
