@@ -30,8 +30,8 @@ tf.compat.v1.app.flags.DEFINE_boolean("allow_soft_placement", True, "Allow devic
 tf.compat.v1.app.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 # My Parameters
-tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "home/110550123/SLEEPdata/cassette_processed/pretext/", "Point to directory of input data")
-tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "home/110550123/SLEEPdata/cassette_processed/test/", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_train_data", "/home/110550123/SLEEPdata/cassette_processed/pretext/", "Point to directory of input data")
+tf.compat.v1.app.flags.DEFINE_string("eeg_test_data", "/home/110550123/SLEEPdata/cassette_processed/test/", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_train_data", "../train_data.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("eog_test_data", "../test_data.mat", "Point to directory of input data")
 tf.compat.v1.app.flags.DEFINE_string("emg_train_data", "../train_data.mat", "Point to directory of input data")
