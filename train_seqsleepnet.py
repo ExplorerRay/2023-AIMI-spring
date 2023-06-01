@@ -225,9 +225,7 @@ print("Train/Eval/Test set: {:d}/{:d}/{:d}".format(train_generator.data_size, ev
 print("Train/Eval/Test batches per epoch: {:d}/{:d}/{:d}".format(train_batches_per_epoch, eval_batches_per_epoch, test_batches_per_epoch))
 
 # variable to keep track of best fscore
-best_fscore = 0.0
-best_acc = 0.0
-best_kappa = 0.0
+best_sum = 0.0
 min_loss = float("inf")
 # Training
 # ==================================================
@@ -370,8 +368,9 @@ with tf.Graph().as_default():
                     eval_acc, eval_yhat, eval_output_loss, eval_total_loss, eval_MaF, eval_kap = evaluate(gen=eval_generator, log_filename="eval_result_log.txt")
                     test_acc, test_yhat, test_output_loss, test_total_loss, test_MaF, test_kap = evaluate(gen=test_generator, log_filename="test_result_log.txt")
 
-                    if(eval_acc >= best_acc):
-                        best_acc = eval_acc
+                    if(eval_acc + eval_MaF + eval_kap >= best_sum):
+                        best_sum = eval_acc + eval_MaF + eval_kap
+                        #best_acc = eval_acc
                         checkpoint_name = os.path.join(checkpoint_path, 'model_step' + str(current_step) +'.ckpt')
                         save_path = saver.save(sess, checkpoint_name)
 
