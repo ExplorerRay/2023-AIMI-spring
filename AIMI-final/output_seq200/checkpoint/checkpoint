@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/110550123/AIMI/output/checkpoint/model_step1600.ckpt"
+all_model_checkpoint_paths: "/home/110550123/AIMI/output/checkpoint/model_step1600.ckpt"
